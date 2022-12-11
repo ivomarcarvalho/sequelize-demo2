@@ -23,7 +23,7 @@ git init
 git -v
 git status
 git add .
-git commit -m "msg"
+git commit -m "msg - primeiro commit"
 
 
 
@@ -31,6 +31,5 @@ git commit -m "msg"
 git branch -M "main"
 
 git push -u origin main
-git remote add origin https://github.com/ivomarcarvalho/sequelize-demo2
-git clone https://github.com/ivomarcarvalho/sequelize-demo2.git
-git push 
+git remote add origin https://github.com/ivomarcarvalho/sequelize-demo2.git
+git push -u origin main
