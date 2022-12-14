@@ -1,13 +1,18 @@
 const express = require('express');
 const routes = require('./routes.js');
-const SincronizarController = require('./controllers/Sincronizar');
+const SincronizarController = require('./controllers/SincronizarController');
+const Teste = require('./controllers/TesteCotroller');
+
+
 const app = express();
 app.use(express.json());
+
+//Teste.findOrCreate(3,'ivomar');
 
 var i=0;
 setInterval(()=>{
     i++;
-    SincronizarController.teste(i);
+    SincronizarController.sincroniza(i);
 },10000);
 
 

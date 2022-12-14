@@ -3,6 +3,7 @@ npm i nodemon -D
 npm i express
 npm i sequelize mysql2
 npm i dotenv
+npm install node-firebird
 
 // migrations para o sequelize
 npx sequelize-cli init

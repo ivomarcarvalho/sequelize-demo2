@@ -1,7 +1,6 @@
 const express = require('express');
 const routes = express.Router();
-const ControllerUsuario = require('./controllers/ControllerUsuario');
-
+const ControllerUsuario = require('./controllers/UsuarioController');
 
 routes
   .get('/usuario/:id',ControllerUsuario.index);
