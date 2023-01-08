@@ -18,6 +18,10 @@ const sequelize = new Sequelize(config.database, config.username, config.passwor
     freezeTableName: true, // Do not change my table names.
     //  timestamps: false // I will do this individually, thanks.
   },
+  timezone: '-03:00',
+        dialectOptions: {
+            useUTC: false
+        },
 });
 
 module.exports = sequelize;

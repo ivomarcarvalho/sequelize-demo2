@@ -2,12 +2,7 @@ const {DataTypes, Sequelize} = require('sequelize');
 const Mysql = require('../database/mysql');
 
 const Usuario = Mysql.define ('t_usuario',{
-      cr_usuario: {
-        type: Sequelize.STRING(3),
-        allowNull: false,
-        primaryKey: true
-      },
-      codigo_usuario: {
+      id: {
         type: Sequelize.INTEGER,
         allowNull: false,
         primaryKey: true

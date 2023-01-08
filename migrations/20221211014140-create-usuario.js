@@ -2,17 +2,16 @@ const { DataTypes } = require("sequelize");
 module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.createTable('t_usuario', {
-      cr_usuario: {
-        type: Sequelize.STRING(3),
-        allowNull: false,
-        primaryKey: true
-      },
-      codigo_usuario: {
+       id: {
         type: Sequelize.INTEGER,
         allowNull: false,
         primaryKey: true
       },
       situacao: {
+        type: Sequelize.STRING(1),
+        allowNull: false
+      },
+      status: {
         type: Sequelize.SMALLINT,
         allowNull: false
       },

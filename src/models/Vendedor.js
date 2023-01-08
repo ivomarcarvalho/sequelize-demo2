@@ -1,12 +1,7 @@
 const Mysql = require('../database/mysql');
-const {Sequelize, DataTypes} = require('sequelize');
-const Vendedor = Mysql.define ('c_vendedor',{
-cr_vendedor: {
-    type: DataTypes.STRING(3),
-    allowNull: false,
-    primaryKey: true
-  },
-  codigo_vendedor: {
+const { Sequelize, DataTypes } = require('sequelize');
+const Vendedor = Mysql.define('c_vendedor', {
+  id: {
     type: DataTypes.INTEGER,
     allowNull: false,
     primaryKey: true

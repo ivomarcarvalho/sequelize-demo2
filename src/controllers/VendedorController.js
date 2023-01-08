@@ -2,12 +2,12 @@ const { executeQuery } = require('../database/configFirebird');
 const Vendedor = require('../models/Vendedor');
 const { Op } = require('sequelize');
 module.exports = {
-    async index(req, res) {
-        let sWhere = '';
+    async index(carga) {
         let filtro = [];
-        if (req === 'I') {
-            sWhere = 'where  c_vendedor.codigo_vendedor > ? ';
-            filtro = [0];
+        let sWhere = '';
+        if (carga === 't') {
+            sWhere = 'where  v.cr_vendedor = ? and v.codigo_vendedor > ? ';
+            filtro = ['001', 0];
         } else {
             const dt = new Date();
             let dateString = dt.toLocaleString('pt-BR', {
@@ -15,41 +15,40 @@ module.exports = {
                 month: '2-digit',
                 day: '2-digit',
             }).replace(/\//g, '.')
-            sWhere = 'where  (c_vendedor.inclusao_data + 5 >= ?) \
-                      or     (c_vendedor.alteracao_data + 5 >= ?) ';
+            sWhere = 'where  (v.inclusao_data + 5 >= ?) \
+                      or     (v.alteracao_data + 5 >= ?) ';
             filtro = [dateString, dateString];
         }
-        let ssql = 'select cr_vendedor,\
-                           codigo_vendedor,\
-                           situacao,\
-                           categoria,\
-                           cpf_cnpj,\
-                           nome,\
-                           cast(observacao as varchar(500)) observacao,\
-                           forca_venda,\
-                           comissionado,\
-                           comissao_base_pagamento,\
-                           comissao_base_apuracao,\
-                           comissao_produto,\
-                           comissao_cta_debito_inclusao,\
-                           comissao_cta_credito_inclusao,\
-                           comissao_cta_debito_liquidacao,\
-                           comissao_cta_credito_liquidacao,\
-                           cr_fornecedor,\
-                           codigo_fornecedor,\
-                           cr_plano_conta_gerencial,\
-                           numero_plano_conta_gerencia,\
-                           cr_centro_custo,\
-                           codigo_centro_custo,\
-                           inclusao_usuario,\
-                           inclusao_data,\
-                           inclusao_hora,\
-                           alteracao_usuario,\
-                           alteracao_data,\
-                           alteracao_hora \
-                    from   c_vendedor ' +
+        let ssql = 'select v.codigo_vendedor,\
+                           v.situacao,\
+                           v.categoria,\
+                           v.cpf_cnpj,\
+                           v.nome,\
+                           cast(v.observacao as varchar(500)) observacao,\
+                           v.forca_venda,\
+                           v.comissionado,\
+                           v.comissao_base_pagamento,\
+                           v.comissao_base_apuracao,\
+                           v.comissao_produto,\
+                           v.comissao_cta_debito_inclusao,\
+                           v.comissao_cta_credito_inclusao,\
+                           v.comissao_cta_debito_liquidacao,\
+                           v.comissao_cta_credito_liquidacao,\
+                           v.cr_fornecedor,\
+                           v.codigo_fornecedor,\
+                           v.cr_plano_conta_gerencial,\
+                           v.numero_plano_conta_gerencia,\
+                           v.cr_centro_custo,\
+                           v.codigo_centro_custo,\
+                           v.inclusao_usuario,\
+                           v.inclusao_data,\
+                           v.inclusao_hora,\
+                           v.alteracao_usuario,\
+                           v.alteracao_data,\
+                           v.alteracao_hora \
+                    from   c_vendedor v ' +
             sWhere +
-            'order by c_vendedor.cr_vendedor,codigo_vendedor';
+            'order by v.cr_vendedor,v.codigo_vendedor';
         executeQuery(ssql, filtro,
             function (err, result) {
                 if (err) {
@@ -72,15 +71,13 @@ async function atualiza(result) {
 async function createOrUpdate(req) {
     const vendedor = await Vendedor.findOne({
         where: {
-            cr_vendedor: req.CR_VENDEDOR.trim(),
-            codigo_vendedor: req.CODIGO_VENDEDOR
+            id: req.CODIGO_VENDEDOR
         }
     })
     if (vendedor === null) {
         //console.log(req.CODIGO_VENDEDOR + ' Não localizado no mysql(se fu)')
         await Vendedor.create({
-            "cr_vendedor": req.CR_VENDEDOR,
-            "codigo_vendedor": req.CODIGO_VENDEDOR,
+            "id": req.CODIGO_VENDEDOR,
             "situacao": req.SITUACAO,
             "categoria": req.CATEGORIA,
             "cpf_cnpj": req.CPF_CNPJ,
@@ -111,8 +108,7 @@ async function createOrUpdate(req) {
         })
     } else {
         await Vendedor.update({
-            "cr_vendedor": req.CR_VENDEDOR,
-            "codigo_vendedor": req.CODIGO_VENDEDOR,
+            "id": req.CODIGO_VENDEDOR,
             "situacao": req.SITUACAO,
             "categoria": req.CATEGORIA,
             "cpf_cnpj": req.CPF_CNPJ,
@@ -141,8 +137,7 @@ async function createOrUpdate(req) {
             "alteracao_hora": `${req.ALTERACAO_HORA.getHours()}:${req.ALTERACAO_HORA.getMinutes()}:${req.ALTERACAO_HORA.getSeconds()}`
         }, {
             where: {
-                cr_vendedor: req.CR_VENDEDOR.trim(),
-                codigo_vendedor: req.CODIGO_VENDEDOR,
+                id: req.CODIGO_VENDEDOR,
                 [Op.or]: [{
                     alteracao_data: {
                         [Op.lt]: req.ALTERACAO_DATA
@@ -165,7 +160,5 @@ async function createOrUpdate(req) {
 
             }
         })
-
-        // console.log(vendedor.codigo_vendedor + ' ' + vendedor.nome);
     }
-}
+};

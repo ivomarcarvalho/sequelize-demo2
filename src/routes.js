@@ -1,8 +1,9 @@
 const express = require('express');
 const routes = express.Router();
-const ControllerUsuario = require('./controllers/UsuarioController');
+const ReceberController = require('./controllers/ReceberController');
 
 routes
-  .get('/usuario/:id',ControllerUsuario.index);
-
+  .get('/receber/:carga',ReceberController.index)
+  .delete('/receber/:titulo',ReceberController.delete);
+ 
 module.exports = routes
