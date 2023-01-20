@@ -7,8 +7,8 @@ module.exports = {
         let filtro = [];
         let sWhere = '';
         if (carga === 't') {
-            sWhere = 'where  c.cr_cliente = ? and c.codigo_cliente > ? ';
-            filtro = ['001',0];
+            sWhere = 'where  (c.cr_cliente = ?) and (c.codigo_cliente > ?) ';
+            filtro = ['001', 0];
         } else {
             const dt = new Date();
             let dateString = dt.toLocaleString('pt-BR', {
@@ -45,15 +45,17 @@ module.exports = {
                     from   c_cliente c \
                            inner join c_cadastro_geral cg on cg.cpf_cnpj = c.cpf_cnpj \
                            inner join c_cadastro_geral_endereco cge on cge.cpf_cnpj = cg.cpf_cnpj ' +
-            sWhere +
+            sWhere + ' ' +
             'order by c.codigo_cliente ';
-        executeQuery(ssql, filtro,
+        await executeQuery(ssql, filtro,
             function (err, result) {
                 if (err) {
                     console.log(err);
                 } else {
                     //console.log(result.length)
                     if (result.length > 0) {
+                        console.log('***** ' + result.length + ' cliente() selecionado(s) *****');
+                        console.log(result);
                         atualiza(result);
                     }
                 }
@@ -68,90 +70,92 @@ async function atualiza(req) {
 }
 
 async function createOrUpdate(req) {
-    const cliente = await Cliente.findOne({
-        where: {
-            id: req.CODIGO_CLIENTE
-        }
-    })
-    if (cliente === null) {
-        await Cliente.create({
-            "id": req.CODIGO_CLIENTE,
-            "situacao": req.SITUACAO,
-            "status": req.STATUS,
-            "cpf_cnpj": req.CPF_CNPJ,
-            "nome_razao_social": req.NOME_RAZAO_SOCIAL,
-            "nome_fantasia": req.NOME_FANTASIA,
-            "limite": req.LIMITE_CREDITO_CG,
-            "limite_d": 0,
-            "logradouro": req.LOGRADOURO,
-            "numero": req.NUMERO,
-            "complemento": req.COMPLEMENTO,
-            "bairro": req.BAIRRO,
-            "municipio": req.MUNICIPIO,
-            "uf": req.UF,
-            "fone1": req.FONE_1,
-            "fone2": req.FONE_2,
-            "celular": req.CELULAR,
-            "limite": req.LIMITE_CREDITO_CG,
-            "limite_d": req.LIMITE_CREDITO_CG,
-            "inclusao_usuario": req.INCLUSAO_USUARIO,
-            "inclusao_data": req.INCLUSAO_DATA,
-            "inclusao_hora": `${req.INCLUSAO_HORA.getHours()}:${req.INCLUSAO_HORA.getMinutes()}:${req.INCLUSAO_HORA.getSeconds()}`,
-            "alteracao_usuario": req.ALTERACAO_USUARIO,
-            "alteracao_data": req.ALTERACAO_DATA,
-            "alteracao_hora": `${req.ALTERACAO_HORA.getHours()}:${req.ALTERACAO_HORA.getMinutes()}:${req.ALTERACAO_HORA.getSeconds()}`
-        })
-    } else {
-        await Cliente.update({
-            "id": req.CODIGO_CLIENTE,
-            "situacao": req.SITUACAO,
-            "status": req.STATUS,
-            "cpf_cnpj": req.CPF_CNPJ,
-            "nome_razao_social": req.NOME_RAZAO_SOCIAL,
-            "nome_fantasia": req.NOME_FANTASIA,
-            "limite": req.LIMITE_CREDITO_CG,
-            "limite_d": 0,
-            "logradouro": req.LOGRADOURO,
-            "numero": req.NUMERO,
-            "complemento": req.COMPLEMENTO,
-            "bairro": req.BAIRRO,
-            "municipio": req.MUNICIPIO,
-            "uf": req.UF,
-            "fone1": req.FONE_1,
-            "fone2": req.FONE_2,
-            "celular": req.CELULAR,
-            "limite": req.LIMITE_CREDITO_CG,
-            "limite_d": req.LIMITE_CREDITO_CG,
-            "inclusao_usuario": req.INCLUSAO_USUARIO,
-            "inclusao_data": req.INCLUSAO_DATA,
-            "inclusao_hora": `${req.INCLUSAO_HORA.getHours()}:${req.INCLUSAO_HORA.getMinutes()}:${req.INCLUSAO_HORA.getSeconds()}`,
-            "alteracao_usuario": req.ALTERACAO_USUARIO,
-            "alteracao_data": req.ALTERACAO_DATA,
-            "alteracao_hora": `${req.ALTERACAO_HORA.getHours()}:${req.ALTERACAO_HORA.getMinutes()}:${req.ALTERACAO_HORA.getSeconds()}`
-        }, {
-            where: {
-                id: req.CODIGO_CLIENTE,
-                [Op.or]: [{
-                    alteracao_data: {
-                        [Op.lt]: req.ALTERACAO_DATA
-                    }
-                },
-                {
-                    [Op.and]: [
-                        {
-                            alteracao_data: {
-                                [Op.eq]: req.ALTERACAO_DATA
-                            },
-                        },
-                        {
-                            alteracao_hora: {
-                                [Op.lt]: `${req.ALTERACAO_HORA.getHours()}:${req.ALTERACAO_HORA.getMinutes()}:${req.ALTERACAO_HORA.getSeconds()}`
-                            }
+    try {
+        const cliente = await Cliente.findByPk(req.CODIGO_CLIENTE);
+        if (cliente === null) {
+            var hora = `${new Date().getHours()}:${new Date().getMinutes()}:${new Date().getSeconds()}`;
+            await Cliente.create({
+                "id": req.CODIGO_CLIENTE,
+                "situacao": req.SITUACAO,
+                "status": req.STATUS,
+                "cpf_cnpj": req.CPF_CNPJ,
+                "nome_razao_social": req.NOME_RAZAO_SOCIAL,
+                "nome_fantasia": req.NOME_FANTASIA,
+                "limite": req.LIMITE_CREDITO_CG,
+                "limite_d": 0,
+                "logradouro": req.LOGRADOURO,
+                "numero": req.NUMERO,
+                "complemento": req.COMPLEMENTO,
+                "bairro": req.BAIRRO,
+                "municipio": req.MUNICIPIO,
+                "uf": req.UF,
+                "fone1": req.FONE_1,
+                "fone2": req.FONE_2,
+                "celular": req.CELULAR,
+                "limite": req.LIMITE_CREDITO_CG,
+                "limite_d": req.LIMITE_CREDITO_CG,
+                "inclusao_usuario": req.INCLUSAO_USUARIO,
+                "inclusao_data": req.INCLUSAO_DATA === null ? new Date() : req.INCLUSAO_DATA,
+                "inclusao_hora": req.INCLUSAO_HORA === null ? hora : req.INCLUSAO_HORA,
+                "alteracao_usuario": req.ALTERACAO_USUARIO,
+                "alteracao_data": req.ALTERACAO_DATA === null ? new Date() : req.ALTERACAO_DATA,
+                "alteracao_hora": req.ALTERACAO_HORA === null ? hora : req.ALTERACAO_HORA
+            })
+        } else {
+            await Cliente.update({
+                "id": req.CODIGO_CLIENTE,
+                "situacao": req.SITUACAO,
+                "status": req.STATUS,
+                "cpf_cnpj": req.CPF_CNPJ,
+                "nome_razao_social": req.NOME_RAZAO_SOCIAL,
+                "nome_fantasia": req.NOME_FANTASIA,
+                "limite": req.LIMITE_CREDITO_CG,
+                "limite_d": 0,
+                "logradouro": req.LOGRADOURO,
+                "numero": req.NUMERO,
+                "complemento": req.COMPLEMENTO,
+                "bairro": req.BAIRRO,
+                "municipio": req.MUNICIPIO,
+                "uf": req.UF,
+                "fone1": req.FONE_1,
+                "fone2": req.FONE_2,
+                "celular": req.CELULAR,
+                "limite": req.LIMITE_CREDITO_CG,
+                "limite_d": req.LIMITE_CREDITO_CG,
+                "inclusao_usuario": req.INCLUSAO_USUARIO,
+                "inclusao_data": req.INCLUSAO_DATA,
+                "inclusao_hora": `${req.INCLUSAO_HORA.getHours()}:${req.INCLUSAO_HORA.getMinutes()}:${req.INCLUSAO_HORA.getSeconds()}`,
+                "alteracao_usuario": req.ALTERACAO_USUARIO,
+                "alteracao_data": req.ALTERACAO_DATA,
+                "alteracao_hora": `${req.ALTERACAO_HORA.getHours()}:${req.ALTERACAO_HORA.getMinutes()}:${req.ALTERACAO_HORA.getSeconds()}`
+            }, {
+                where: {
+                    id: req.CODIGO_CLIENTE,
+                    [Op.or]: [{
+                        alteracao_data: {
+                            [Op.lt]: req.ALTERACAO_DATA
                         }
-                    ]
-                }]
+                    },
+                    {
+                        [Op.and]: [
+                            {
+                                alteracao_data: {
+                                    [Op.eq]: req.ALTERACAO_DATA
+                                },
+                            },
+                            {
+                                alteracao_hora: {
+                                    [Op.lt]: `${req.ALTERACAO_HORA.getHours()}:${req.ALTERACAO_HORA.getMinutes()}:${req.ALTERACAO_HORA.getSeconds()}`
+                                }
+                            }
+                        ]
+                    }]
 
-            }
-        })
+                }
+            })
+        }
+
+    } catch (error) {
+        console.log('Error:' + error);
     }
 }

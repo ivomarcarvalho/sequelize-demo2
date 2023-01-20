@@ -19,9 +19,9 @@ const sequelize = new Sequelize(config.database, config.username, config.passwor
     //  timestamps: false // I will do this individually, thanks.
   },
   timezone: '-03:00',
-        dialectOptions: {
-            useUTC: false
-        },
+  //      dialectOptions: {
+  //          useUTC: false
+  //      },
 });
 
 module.exports = sequelize;

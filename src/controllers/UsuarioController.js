@@ -6,18 +6,18 @@ module.exports = {
     let filtro = [];
     let sWhere = '';
     if (carga === 't') {
-        sWhere = 'where  u.cr_usuario = ? and u.codigo_usuario > ? ';
-        filtro = ['001',0];
+      sWhere = 'where  u.cr_usuario = ? and u.codigo_usuario > ? ';
+      filtro = ['001', 0];
     } else {
-        const dt = new Date();
-        let dateString = dt.toLocaleString('pt-BR', {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-        }).replace(/\//g, '.')
-        sWhere = 'where  (u.inclusao_data + 5 >= ?) \
+      const dt = new Date();
+      let dateString = dt.toLocaleString('pt-BR', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+      }).replace(/\//g, '.')
+      sWhere = 'where  (u.inclusao_data + 5 >= ?) \
                   or     (u.alteracao_data + 5 >= ?) ';
-        filtro = [dateString, dateString];
+      filtro = [dateString, dateString];
     }
     let ssql = 'select u.codigo_usuario,\
                        u.nome, \
@@ -33,14 +33,13 @@ module.exports = {
                        u.alteracao_data, \
                        u.alteracao_hora \
                   from t_usuario u '+
-                  sWhere+
-                  'order by u.cr_usuario, u.codigo_usuario ';
+      sWhere +
+      'order by u.cr_usuario, u.codigo_usuario ';
     executeQuery(ssql, filtro,
       function (err, result) {
         if (err) {
           console.log(err);
         } else {
-          //console.log(result.length)
           if (result.length > 0) {
             atualiza(result);
           }
@@ -60,6 +59,7 @@ async function createOrUpdate(req) {
     }
   })
   if (usuario === null) {
+    var hora = `${new Date().getHours()}:${new Date().getMinutes()}:${new Date().getSeconds()}`;
     await Usuario.create({
       "id": req.CODIGO_USUARIO,
       "nome": req.NOME,
@@ -69,11 +69,11 @@ async function createOrUpdate(req) {
       "senha": req.SENHA,
       "observacao": req.OBSERVACAO,
       "inclusao_usuario": req.INCLUSAO_USUARIO,
-      "inclusao_data": req.INCLUSAO_DATA,
-      "inclusao_hora": req.INCLUSAO_HORA,
+      "inclusao_data": req.INCLUSAO_DATA === null ? new Date() : req.INCLUSAO_DATA,
+      "inclusao_hora": req.INCLUSAO_HORA === null ? hora : req.INCLUSAO_HORA,
       "alteracao_usuario": req.ALTERACAO_USUARIO,
-      "alteracao_data": req.ALTERACAO_DATA,
-      "alteracao_hora": req.ALTERACAO_HORA
+      "alteracao_data": req.ALTERACAO_DATA === null ? new Date() : req.ALTERACAO_DATA,
+      "alteracao_hora": req.ALTERACAO_HORA === null ? hora : req.ALTERACAO_HORA
     })
   } else {
     await Usuario.update({

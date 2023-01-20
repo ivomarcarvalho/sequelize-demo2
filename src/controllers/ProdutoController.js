@@ -70,17 +70,18 @@ async function createOrUpdate(req) {
         }
     })
     if (produto === null) {
+        var hora = `${new Date().getHours()}:${new Date().getMinutes()}:${new Date().getSeconds()}`;
         await Produto.create({
             "id": req.CODIGO_PRODUTO,
             "descricao": req.DESCRICAO,
             "status": req.STATUS,
             "ucom": req.UCOM,
             "inclusao_usuario": req.INCLUSAO_USUARIO,
-            "inclusao_data": req.INCLUSAO_DATA,
-            "inclusao_hora": req.INCLUSAO_HORA,
+            "inclusao_data": req.INCLUSAO_DATA === null ? new Date() : req.INCLUSAO_DATA,
+            "inclusao_hora": req.INCLUSAO_HORA === null ? hora : req.INCLUSAO_HORA,
             "alteracao_usuario": req.ALTERACAO_USUARIO,
-            "alteracao_data": req.ALTERACAO_DATA,
-            "alteracao_hora": req.ALTERACAO_HORA
+            "alteracao_data": req.ALTERACAO_DATA === null ? new Date() : req.ALTERACAO_DATA,
+            "alteracao_hora": req.ALTERACAO_HORA === null ? hora : req.ALTERACAO_HORA
         })
     } else {
         await Produto.update({

@@ -69,13 +69,9 @@ async function atualiza(result) {
 }
 
 async function createOrUpdate(req) {
-    const vendedor = await Vendedor.findOne({
-        where: {
-            id: req.CODIGO_VENDEDOR
-        }
-    })
+    const vendedor = await Vendedor.findByPk(req.CODIGO_VENDEDOR);
     if (vendedor === null) {
-        //console.log(req.CODIGO_VENDEDOR + ' Não localizado no mysql(se fu)')
+        var hora = `${new Date().getHours()}:${new Date().getMinutes()}:${new Date().getSeconds()}`;
         await Vendedor.create({
             "id": req.CODIGO_VENDEDOR,
             "situacao": req.SITUACAO,
@@ -99,12 +95,11 @@ async function createOrUpdate(req) {
             "cr_centro_custo": req.CR_CENTRO_CUSTO,
             "codigo_centro_custo": req.CODIGO_CENTRO_CUSTO,
             "inclusao_usuario": req.INCLUSAO_USUARIO,
-            "inclusao_data": req.INCLUSAO_DATA,
-            "inclusao_hora": `${req.INCLUSAO_HORA.getHours()}:${req.INCLUSAO_HORA.getMinutes()}:${req.INCLUSAO_HORA.getSeconds()}`,
+            "inclusao_data": req.INCLUSAO_DATA === null ? new Date() : req.INCLUSAO_DATA,
+            "inclusao_hora": req.INCLUSAO_HORA === null ? hora : req.INCLUSAO_HORA,
             "alteracao_usuario": req.ALTERACAO_USUARIO,
-            "alteracao_data": req.ALTERACAO_DATA,
-            "alteracao_hora": `${req.ALTERACAO_HORA.getHours()}:${req.ALTERACAO_HORA.getMinutes()}:${req.ALTERACAO_HORA.getSeconds()}`
-
+            "alteracao_data": req.ALTERACAO_DATA === null ? new Date() : req.ALTERACAO_DATA,
+            "alteracao_hora": req.ALTERACAO_HORA === null ? hora : req.ALTERACAO_HORA
         })
     } else {
         await Vendedor.update({

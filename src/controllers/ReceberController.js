@@ -1,11 +1,10 @@
 const { executeQuery } = require('../database/configFirebird');
 const Receber = require('../models/Receber');
-const { Op } = require('sequelize');
+const { Op, Sequelize } = require('sequelize');
 
 module.exports = {
     async index(carga) {
         console.log(carga);
-
         let filtro = [];
         let sWhere = '';
         if (carga === 't') {
@@ -81,57 +80,59 @@ async function atualiza(req) {
 };
 
 async function createOrUpdate(req) {
-    const receber = await Receber.findByPk(req.NUMERO_TITULO)
-        .catch((err) => {
-            console.log('Error: ' + err)
-        })
-    if (receber === null) {
-        await Receber.create({
-            "numero_titulo": req.NUMERO_TITULO,
-            "sequencia_operacao": req.SEQUENCIA_OPERACAO,
-            "dt_emissao": req.DATA_EMISSAO,
-            "dt_vencimento": req.DATA_VENCIMENTO,
-            "clienteId": req.CODIGO_CLIENTE,
-            "vendedorId": req.CODIGO_VENDEDOR,
-            "situacao": req.SITUACAO,
-            "vlr_titulo": req.VALOR_TITULO,
-            "vlr_recebido": req.TOT_VALOR_RECEBIDO,
-            "vlr_areceber": req.TOT_VALOR_ARECEBER,
-            "atraso": req.ATRASO,
-            "inclusao_usuario": req.INCLUSAO_USUARIO,
-            "inclusao_data": req.INCLUSAO_DATA,
-            "inclusao_hora": req.INCLUSAO_HORA,
-            "alteracao_usuario": req.ALTERACAO_USUARIO,
-            "alteracao_data": req.ALTERACAO_DATA,
-            "alteracao_hora": req.ALTERACAO_HORA
-        })
-    } else {
-        await Receber.update({
+    try {
+        const receber = await Receber.findByPk(req.NUMERO_TITULO)
+        if (receber === null) {
+            var hora = `${new Date().getHours()}:${new Date().getMinutes()}:${new Date().getSeconds()}`;
+            await Receber.create({
+                "numero_titulo": req.NUMERO_TITULO,
+                "sequencia_operacao": req.SEQUENCIA_OPERACAO,
+                "dt_emissao": req.DATA_EMISSAO,
+                "dt_vencimento": req.DATA_VENCIMENTO,
+                "clienteId": req.CODIGO_CLIENTE,
+                "vendedorId": req.CODIGO_VENDEDOR,
+                "situacao": req.SITUACAO,
+                "vlr_titulo": req.VALOR_TITULO,
+                "vlr_recebido": req.TOT_VALOR_RECEBIDO,
+                "vlr_areceber": req.TOT_VALOR_ARECEBER,
+                "atraso": req.ATRASO,
+                "inclusao_usuario": req.INCLUSAO_USUARIO,
+                "inclusao_data": req.INCLUSAO_DATA === null ? new Date() : req.INCLUSAO_DATA,
+                "inclusao_hora": req.INCLUSAO_HORA === null ? hora : req.INCLUSAO_HORA,
+                "alteracao_usuario": req.ALTERACAO_USUARIO,
+                "alteracao_data": req.ALTERACAO_DATA === null ? new Date() : req.ALTERACAO_DATA,
+                "alteracao_hora": req.ALTERACAO_HORA === null ? hora : req.ALTERACAO_HORA
+            })
+        } else {
+            await Receber.update({
 
-        }, {
-            where: {
-                numero_titulo: req.NUMERO_TITULO,
-                [Op.or]: [{
-                    alteracao_data: {
-                        [Op.lt]: req.ALTERACAO_DATA
-                    }
-                },
-                {
-                    [Op.and]: [
-                        {
-                            alteracao_data: {
-                                [Op.eq]: req.ALTERACAO_DATA
-                            },
-                        },
-                        {
-                            alteracao_hora: {
-                                [Op.lt]: `${req.ALTERACAO_HORA.getHours()}:${req.ALTERACAO_HORA.getMinutes()}:${req.ALTERACAO_HORA.getSeconds()}`
-                            }
+            }, {
+                where: {
+                    numero_titulo: req.NUMERO_TITULO,
+                    [Op.or]: [{
+                        alteracao_data: {
+                            [Op.lt]: req.ALTERACAO_DATA
                         }
-                    ]
-                }]
-            }
-        })
+                    },
+                    {
+                        [Op.and]: [
+                            {
+                                alteracao_data: {
+                                    [Op.eq]: req.ALTERACAO_DATA
+                                },
+                            },
+                            {
+                                alteracao_hora: {
+                                    [Op.lt]: `${req.ALTERACAO_HORA.getHours()}:${req.ALTERACAO_HORA.getMinutes()}:${req.ALTERACAO_HORA.getSeconds()}`
+                                }
+                            }
+                        ]
+                    }]
+                }
+            })
 
+        }
+    } catch (error) {
+        console.log('Error: ' + error)
     }
 }

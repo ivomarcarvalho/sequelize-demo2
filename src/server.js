@@ -5,9 +5,14 @@ const SincronizarController = require('./controllers/SincronizarController');
 const app = express();
 app.use(express.json());
 
-setInterval(() => {
+
+setTimeout(() => {
     SincronizarController.sincroniza();
-}, 10000);
+}, 10000,[])
+
+//setInterval(() => {
+//  SincronizarController.sincroniza();
+//}, 30000);
 
 
 app.use(routes);
