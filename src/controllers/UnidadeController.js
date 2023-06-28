@@ -1,11 +1,16 @@
 const Unidade = require('../models/Unidade');
 const { executeQuery } = require('../database/configFirebird');
+const moment = require('moment/moment');
 
 module.exports = {
     async atualiza(carga) {
-          show(carga)
-            .then((req) => {
-                createOrUpdate(req)
+        show(carga)
+            .then(createOrUpdate)
+            .then(() => {
+                console.log('deu bom')
+            .catch(()=> {
+                console.log('deu ruim')
+            })
             })
     }
 }
@@ -51,25 +56,71 @@ function show(carga) {
             })
     })
 }
+function ivm(req) {
+    return new Promise((resolve, reject) => {
+        Object.keys(req).forEach(item => {
+            findCreateUpdate(req[item])
+            console.log('xxxxxx ivm xxxxxxx')
+        })
+    })
+}
 
 async function createOrUpdate(req) {
     await Object.keys(req).forEach(item => {
-        findFirst(req[item])
+        findCreateUpdate(req[item])
     })
 }
 
-async function findFirst(req) {
-    const unidade = await Unidade.findOne({
+async function findCreateUpdate(req) {
+    console.log('No Firebird = ' + req.UNIDADE + ' ' + req.DESCRICAO + ' *********** ');
+    const [unidade, created] = await Unidade.findOrCreate({
         where: {
-            unidade: req.UNIDADE
+            ucom: req.UNIDADE
+        },
+        defaults: {
+            descricao: req.DESCRICAO,
+            inclusao_usuario: req.INCLUSAO_USUARIO,
+            inclusao_data: req.INCLUSAO_DATA,
+            inclusao_hora: req.INCLUSAO_HORA,
+            alteracao_usuario: req.INCLUSAO_USUARIO,
+            alteracao_data: req.ALTERACAO_DATA,
+            alteracao_hora: req.ALTERACAO_HORA
+
+
         }
     })
-    if (unidade === null) {
-        console.log('nao existe')
-    } else {
-        console.log(' existe')
 
+    if (created) {
+        console.log('*********** created *************');
+        console.log(unidade.ucom);
+    } else {
+        let dtFb = null;
+        let dtMy = null;
+        let hhFb = null;
+        let hhMy = null;
+
+        if (req.ALTERACAO_DATA != null) {
+            dtFb = moment(req.ALTERACAO_DATA).format('YYYY-MM-DD');
+            hhFb = moment(req.ALTERACAO_HORA,'hh:mm:ss').format('hh:mm:ss');
+        }
+        if (unidade.alteracao_data != null) {
+            dtMy = moment(unidade.alteracao_data).format('YYYY-MM-DD');
+            hhMy = moment(unidade.alteracao_hora, 'hh:mm:ss').format('hh:mm:ss');
+        }
+        if ((dtFb != dtMy) || (hhFb != hhMy)) {
+            console.log('*********** updated *************');
+            console.log('DATA FB ' + dtFb + ' ' + hhFb);
+            console.log('DATA My ' + dtMy + ' ' + hhMy);
+            await Unidade.update({
+                descricao: req.DESCRICAO,
+                alteracao_usuario: req.ALTERACAO_USUARIO,
+                alteracao_data: req.ALTERACAO_DATA,
+                alteracao_hora: req.ALTERACAO_HORA
+            }, {
+                where: {
+                    ucom: req.UNIDADE
+                }
+            });
+        }
     }
 }
-
-

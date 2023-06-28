@@ -4,6 +4,8 @@ npm i express
 npm i sequelize mysql2
 npm i dotenv
 npm install node-firebird
+// moment().format('YYYY/MM/HH')
+yarn add moment
 
 // migrations para o sequelize
 npx sequelize-cli init
