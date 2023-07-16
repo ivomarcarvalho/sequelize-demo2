@@ -22,10 +22,10 @@ module.exports = {
       } else {
          carga = 'm'
       }
-      await Unidade.atualiza(carga);
+      //await Unidade.atualiza(carga);
       //await Cliente.index(carga);
       //await Usuario.index(carga);
-      //await Vendedor.index(carga);
+      await Vendedor.atualiza(carga);
       //await Condicao_pagto.index(carga);
       //await Produto.index(carga); 
       //await Receber.index(carga);
