@@ -69,8 +69,8 @@ function show(carga) {
                             r.alteracao_data,\
                             r.alteracao_hora \
                     from f_receber r '+
-            sWhere +
-            'order by r.cr_receber, r.numero_titulo ';
+                    sWhere +
+                    'order by r.cr_receber, r.numero_titulo ';
         executeQuery(ssql, filtro,
             function (err, result) {
                 if (err) {
@@ -91,11 +91,54 @@ async function createOrUpdate(req) {
 }
 
 async function findCreateUpdate(req) {
-    try {
-        const receber = await Receber.findByPk(req.NUMERO_TITULO)
-        if (receber === null) {
-            var hora = `${new Date().getHours()}:${new Date().getMinutes()}:${new Date().getSeconds()}`;
-            await Receber.create({
+    //console.log('No Firebird = ' + req.NUMERO_TITULO + ' ' + ' *********** ');
+    const [receber, created] = await Receber.findOrCreate({
+        where: {
+            numero_titulo: req.NUMERO_TITULO
+        },
+        defaults: {
+            "numero_titulo": req.NUMERO_TITULO,
+            "sequencia_operacao": req.SEQUENCIA_OPERACAO,
+            "dt_emissao": req.DATA_EMISSAO,
+            "dt_vencimento": req.DATA_VENCIMENTO,
+            "clienteId": req.CODIGO_CLIENTE,
+            "vendedorId": req.CODIGO_VENDEDOR,
+            "situacao": req.SITUACAO,
+            "vlr_titulo": req.VALOR_TITULO,
+            "vlr_recebido": req.TOT_VALOR_RECEBIDO,
+            "vlr_areceber": req.TOT_VALOR_ARECEBER,
+            "atraso": req.ATRASO,
+            "inclusao_usuario": req.INCLUSAO_USUARIO,
+            "inclusao_data": req.INCLUSAO_DATA,
+            "inclusao_hora": `${req.INCLUSAO_HORA.getHours()}:${req.INCLUSAO_HORA.getMinutes()}:${req.INCLUSAO_HORA.getSeconds()}`,
+            "alteracao_usuario": req.ALTERACAO_USUARIO,
+            "alteracao_data": req.ALTERACAO_DATA,
+            "alteracao_hora": `${req.ALTERACAO_HORA.getHours()}:${req.ALTERACAO_HORA.getMinutes()}:${req.ALTERACAO_HORA.getSeconds()}`
+        }
+    })
+
+    if (created) {
+        console.log('*********** created *************');
+        console.log(receber.numero_titulo);
+    } else {
+        let dtFb = null;
+        let dtMy = null;
+        let hhFb = null;
+        let hhMy = null;
+
+        if (req.ALTERACAO_DATA != null) {
+            dtFb = moment(req.ALTERACAO_DATA).format('YYYY-MM-DD');
+            hhFb = moment(req.ALTERACAO_HORA, 'hh:mm:ss').format('hh:mm:ss');
+        }
+        if (receber.alteracao_data != null) {
+            dtMy = moment(receber.alteracao_data).format('YYYY-MM-DD');
+            hhMy = moment(receber.alteracao_hora, 'hh:mm:ss').format('hh:mm:ss');
+        }
+        if ((dtFb != dtMy) || (hhFb != hhMy)) {
+            console.log('*********** updated *************');
+            console.log('DATA FB ' + dtFb + ' ' + hhFb);
+            console.log('DATA My ' + dtMy + ' ' + hhMy);
+            await Receber.update({
                 "numero_titulo": req.NUMERO_TITULO,
                 "sequencia_operacao": req.SEQUENCIA_OPERACAO,
                 "dt_emissao": req.DATA_EMISSAO,
@@ -108,58 +151,16 @@ async function findCreateUpdate(req) {
                 "vlr_areceber": req.TOT_VALOR_ARECEBER,
                 "atraso": req.ATRASO,
                 "inclusao_usuario": req.INCLUSAO_USUARIO,
-                "inclusao_data": req.INCLUSAO_DATA === null ? new Date() : req.INCLUSAO_DATA,
-                "inclusao_hora": req.INCLUSAO_HORA === null ? hora : req.INCLUSAO_HORA,
+                "inclusao_data": req.INCLUSAO_DATA,
+                "inclusao_hora": `${req.INCLUSAO_HORA.getHours()}:${req.INCLUSAO_HORA.getMinutes()}:${req.INCLUSAO_HORA.getSeconds()}`,
                 "alteracao_usuario": req.ALTERACAO_USUARIO,
-                "alteracao_data": req.ALTERACAO_DATA === null ? new Date() : req.ALTERACAO_DATA,
-                "alteracao_hora": req.ALTERACAO_HORA === null ? hora : req.ALTERACAO_HORA
-            })
-        } else {
-            let dtFb = null;
-            let dtMy = null;
-            let hhFb = null;
-            let hhMy = null;
-
-            if (req.ALTERACAO_DATA != null) {
-                dtFb = moment(req.ALTERACAO_DATA).format('YYYY-MM-DD');
-                hhFb = moment(req.ALTERACAO_HORA, 'hh:mm:ss').format('hh:mm:ss');
-            }
-            if (receber.alteracao_data != null) {
-                dtMy = moment(receber.alteracao_data).format('YYYY-MM-DD');
-                hhMy = moment(receber.alteracao_hora, 'hh:mm:ss').format('hh:mm:ss');
-            }
-            if ((dtFb != dtMy) || (hhFb != hhMy)) {
-                console.log('*********** updated *************');
-                console.log('DATA FB ' + dtFb + ' ' + hhFb);
-                console.log('DATA My ' + dtMy + ' ' + hhMy);
-                await Receber.update({
-                    "numero_titulo": req.NUMERO_TITULO,
-                    "sequencia_operacao": req.SEQUENCIA_OPERACAO,
-                    "dt_emissao": req.DATA_EMISSAO,
-                    "dt_vencimento": req.DATA_VENCIMENTO,
-                    "clienteId": req.CODIGO_CLIENTE,
-                    "vendedorId": req.CODIGO_VENDEDOR,
-                    "situacao": req.SITUACAO,
-                    "vlr_titulo": req.VALOR_TITULO,
-                    "vlr_recebido": req.TOT_VALOR_RECEBIDO,
-                    "vlr_areceber": req.TOT_VALOR_ARECEBER,
-                    "atraso": req.ATRASO,
-                    "inclusao_usuario": req.INCLUSAO_USUARIO,
-                    "inclusao_data": req.INCLUSAO_DATA,
-                    "inclusao_hora": `${req.INCLUSAO_HORA.getHours()}:${req.INCLUSAO_HORA.getMinutes()}:${req.INCLUSAO_HORA.getSeconds()}`,
-                    "alteracao_usuario": req.ALTERACAO_USUARIO,
-                    "alteracao_data": req.ALTERACAO_DATA,
-                    "alteracao_hora": `${req.ALTERACAO_HORA.getHours()}:${req.ALTERACAO_HORA.getMinutes()}:${req.ALTERACAO_HORA.getSeconds()}`
-                }, {
-                    where: {
-                        numero_titulo: req.NUMERO_TITULO
-                    }
-                });
-
-            }
+                "alteracao_data": req.ALTERACAO_DATA,
+                "alteracao_hora": `${req.ALTERACAO_HORA.getHours()}:${req.ALTERACAO_HORA.getMinutes()}:${req.ALTERACAO_HORA.getSeconds()}`
+            }, {
+                where: {
+                    numero_titulo: req.NUMERO_TITULO
+                }
+            });
         }
-    } catch (error) {
-        console.log('Error: ' + error)
     }
 }
-
