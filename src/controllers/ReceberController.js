@@ -1,6 +1,7 @@
 const Receber = require('../models/Receber');
 const { executeQuery } = require('../database/configFirebird');
 const moment = require('moment/moment');
+const { col } = require('sequelize');
 
 module.exports = {
     async atualiza(carga) {
@@ -51,7 +52,7 @@ function show(carga) {
                       or     (r.alteracao_data + 5 >= ?) ';
             filtro = [dateString, dateString];
         }
-        let ssql = 'select  r.numero_titulo,\
+        let ssql = 'select first 2 r.numero_titulo,\
                             r.situacao,\
                             r.data_emissao,\
                             r.data_vencimento,\
@@ -85,15 +86,22 @@ function show(carga) {
 }
 
 async function createOrUpdate(req) {
-    await Object.keys(req).forEach(item => {
-        findCreateUpdate(req[item])
-    })
+   // console.log(req)
+
+    await Receber.bulkCreate([{
+        'numero_titulo':1
+
+    },{'numero_titulo':2}]);
+    //await Object.keys(req).forEach(item => {
+    //    findCreateUpdate(req[item])
+    //})
 }
 
 async function findCreateUpdate(req) {
     try {
         const receber = await Receber.findByPk(req.NUMERO_TITULO)
         if (receber === null) {
+            console.log('No Firebird = ' + req.NUMERO_TITULO + ' ' + ' *********** ');
             var hora = `${new Date().getHours()}:${new Date().getMinutes()}:${new Date().getSeconds()}`;
             await Receber.create({
                 "numero_titulo": req.NUMERO_TITULO,
