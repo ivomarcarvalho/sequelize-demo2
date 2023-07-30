@@ -5,13 +5,21 @@ const { col } = require('sequelize');
 
 module.exports = {
     async atualiza(carga) {
-        show(carga)
-            .then(createOrUpdate)
-            .then(() => {
-                console.log('deu bom')
-                    .catch(() => {
-                        console.log('deu ruim')
-                    })
+        receberFirebird(carga)
+            .then((titulos) => {
+                console.log('leitura firebird, deu bom!')
+                if (carga === 't') {
+                    create(titulos)
+                        .then((r) => {
+                            console.log(r)
+                        })
+                        .catch((err)=>{
+                            console.log(err)
+                        })
+                }
+            })
+            .catch(() => {
+                console.log('Houve um erro na leitura firebird!')
             })
     },
     async delete(req, res) {
@@ -34,7 +42,7 @@ module.exports = {
 }
 
 
-function show(carga) {
+function receberFirebird(carga) {
     return new Promise((resolve, reject) => {
         let filtro = [];
         let sWhere = '';
@@ -52,17 +60,17 @@ function show(carga) {
                       or     (r.alteracao_data + 5 >= ?) ';
             filtro = [dateString, dateString];
         }
-        let ssql = 'select first 2 r.numero_titulo,\
+        let ssql = 'select  first 1 r.numero_titulo,\
                             r.situacao,\
-                            r.data_emissao,\
-                            r.data_vencimento,\
-                            r.data_quitacao,\
-                            r.codigo_cliente,\
-                            r.codigo_vendedor,\
+                            r.data_emissao dt_emissao,\
+                            r.data_vencimento dt_vencimento,\
+                            r.data_quitacao dt_quitacao,\
+                            r.codigo_cliente cliente_id,\
+                            r.codigo_vendedor vendedor_id,\
                             r.sequencia_operacao,\
-                            r.valor_titulo,\
-                            r.tot_valor_recebido,\
-                            r.tot_valor_areceber,\
+                            r.valor_titulo vlr_titulo,\
+                            r.tot_valor_recebido vlr_recebido,\
+                            r.tot_valor_areceber vlr_areceber,\
                             r.inclusao_usuario,\
                             r.inclusao_data,\
                             r.inclusao_hora,\
@@ -84,17 +92,41 @@ function show(carga) {
             })
     })
 }
+async function create(req) {
+    console.log(req)
+    return new Promise((resolve, reject) => {
+        Receber.bulkCreate(req)
+        var r = 'r=blz'
+        if (1===12){
+            resolve(r)
+
+        }else{
+            var err = 'com erro'
+            reject(err)
+        }
+    })
+}
 
 async function createOrUpdate(req) {
-   // console.log(req)
+    //console.log(req.map(x=>x))
+    // console.log(req)
+    //  await Receber.bulkCreate(req);
 
-    await Receber.bulkCreate([{
-        'numero_titulo':1
+    /*
+       await Receber.bulkCreate([{
+           'numero_titulo':req.map(x=>x.NUMERO_TITULO)}]);
+    */
 
-    },{'numero_titulo':2}]);
-    //await Object.keys(req).forEach(item => {
-    //    findCreateUpdate(req[item])
-    //})
+    var titulos = req.slice(3, 4); // pule 3 e pare no quarto
+    for (let x of titulos) {
+        console.log(x.NUMERO_TITULO + ' ' + x.VALOR_TITULO)
+    }
+
+
+    /*
+     await Object.keys(req).forEach(item => {
+         findCreateUpdate(req[item])})
+    */
 }
 
 async function findCreateUpdate(req) {

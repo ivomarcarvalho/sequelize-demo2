@@ -6,7 +6,7 @@ const dbOptions = {
     database: 'C:\\sci\\D Rodrigues ZN\\banco\\DBSYSTEM.GDB',
     user: 'SYSDBA',
     password: 'masterkey',
-    lowercase_keys: false, // set to true to lowercase keys
+    lowercase_keys: true, // set to true to lowercase keys
     role: null,            // default
     pageSize: 4096,        // default when creating database
     retryConnectionInterval: 1000 // reconnect interval in case of connection drop
